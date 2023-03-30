@@ -153,3 +153,6 @@ resource "aws_instance" "Ec2_Linux" {
       Name = "Ec2_Linux"
     }
 }
+output "public_ip" {
+    value = aws_instance.Ec2_Linux.public_ip
+}
