@@ -97,3 +97,59 @@ resource "aws_route_table_association" "private_route1" {
     route_table_id = aws_vpc.Project.main_route_table_id
     subnet_id = aws_subnet.PrivateSubnet.id
 }
+resource "aws_security_group" "projectSGPrivate" {
+    vpc_id = aws_vpc.Project.id
+    name = "private_SG"
+    description = "private_rule"
+    ingress {
+      cidr_blocks = [aws_vpc.Project.cidr_block]
+      description = "ssh"
+      from_port = 22
+      protocol = "tcp"
+      to_port = 22
+    }
+
+    ingress {
+      cidr_blocks = [aws_vpc.Project.cidr_block]
+      description = "http"
+      from_port = 80
+      protocol = "tcp"
+      to_port = 80
+    }
+
+    ingress {
+      cidr_blocks = [aws_vpc.Project.cidr_block]
+      description = "https"
+      from_port = 443
+      protocol = "tcp"
+      to_port = 443
+    }
+
+    ingress {
+      cidr_blocks = [aws_vpc.Project.cidr_block]
+      description = "tomcat"
+      from_port = 8080
+      protocol = "tcp"
+      to_port = 8080
+    }
+    
+    egress {
+      cidr_blocks = [ "0.0.0.0/0" ]
+      description = "All_traffic"
+      from_port = 0
+      protocol = "-1"
+      self = false
+      to_port = 0
+    }
+}
+
+resource "aws_instance" "Ec2_Linux" {
+    ami = var.AMI[var.REGION]
+    instance_type = var.type
+    key_name = aws_key_pair.projectKey.key_name
+    subnet_id = aws_subnet.PrivateSubnet.id
+    security_groups = [aws_security_group.projectSGPrivate.id]
+    tags = {
+      Name = "Ec2_Linux"
+    }
+}
